@@ -4,7 +4,44 @@
 #include<string.h>
 #include<ctype.h>
 #include<windows.h>
-
+//Possível menu do trabalho...
+/*
+void menu()
+{
+	clrscr();
+	int x=5, y=2;
+	for(int i=0; i<20; i++)
+	{
+		gotoxy(x,y);
+		printf("%c", 220);		
+		y++;
+		Sleep(20);
+	}
+	for(int i=0; i<35;i++)
+	{
+		gotoxy(x,y);
+		printf("%c", 220);
+		x = x+2;
+		Sleep(20);
+	}
+	for(int i=0;i<21;i++)	
+	{
+		gotoxy(x,y);
+		printf("%c", 220);
+		y = y-1;
+		Sleep(20);
+	}
+	y=1;
+	x=75;
+	for(int i=36;i>0;i--)
+	{		
+		gotoxy(x,y);
+		printf("%c", 220);
+		x = x - 2;
+		Sleep(20);	
+	}
+}
+*/
 struct TpJogo
 {
 	int CodJogo;
