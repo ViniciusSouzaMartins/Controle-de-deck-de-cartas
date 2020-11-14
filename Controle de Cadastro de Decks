@@ -4,44 +4,9 @@
 #include<string.h>
 #include<ctype.h>
 #include<windows.h>
-//Possível menu do trabalho...
-/*
-void menu()
-{
-	clrscr();
-	int x=5, y=2;
-	for(int i=0; i<20; i++)
-	{
-		gotoxy(x,y);
-		printf("%c", 220);		
-		y++;
-		Sleep(20);
-	}
-	for(int i=0; i<35;i++)
-	{
-		gotoxy(x,y);
-		printf("%c", 220);
-		x = x+2;
-		Sleep(20);
-	}
-	for(int i=0;i<21;i++)	
-	{
-		gotoxy(x,y);
-		printf("%c", 220);
-		y = y-1;
-		Sleep(20);
-	}
-	y=1;
-	x=75;
-	for(int i=36;i>0;i--)
-	{		
-		gotoxy(x,y);
-		printf("%c", 220);
-		x = x - 2;
-		Sleep(20);	
-	}
-}
-*/
+
+#define TF 100
+
 struct TpJogo
 {
 	int CodJogo;
@@ -61,6 +26,91 @@ struct TpDeck
 	char Titulo[300], Jogador[100], NomeJogo[300];
 	
 };typedef struct TpDeck Decks;
+
+void ExibirJogos(char Jogo[100])
+{
+	Jogos ExibeJogos;	
+	FILE *PtrExibJogo = fopen(Jogo,"rb");
+	fread(&ExibeJogos, sizeof(Jogos), 1, PtrExibJogo);
+	while(!feof(PtrExibJogo))
+	{
+		printf("Codigo do jogo: %d\nNome do jogo: %s\n\n", ExibeJogos.CodJogo, ExibeJogos.DescJogo);
+		fread(&ExibeJogos, sizeof(Jogos), 1, PtrExibJogo);
+	}
+	getch();	
+	fclose(PtrExibJogo);	
+}
+
+void ExibirCartas(char Carta[100])
+{
+	Cartas ExibeCartas;	
+	FILE *PtrExibCarta = fopen(Carta,"rb");
+	fread(&ExibeCartas, sizeof(Cartas), 1, PtrExibCarta);
+	while(!feof(PtrExibCarta))
+	{
+		printf("Codigo da carta: %d\nNome do carta: %s\nDescricao da carta: %s\nCodigo do deck: %d\n\n", ExibeCartas.CodCarta, ExibeCartas.NomeCarta, ExibeCartas.DescCarta, ExibeCartas.CodDeck);
+		fread(&ExibeCartas, sizeof(Cartas), 1, PtrExibCarta);
+	}
+	getch();	
+	fclose(PtrExibCarta);	
+}
+
+void ExibirDecks(char Deck[100])
+{
+	Decks ExibeDecks;	
+	FILE *PtrExibDeck = fopen(Deck,"rb");
+	fread(&ExibeDecks, sizeof(Decks), 1, PtrExibDeck);
+	while(!feof(PtrExibDeck))
+	{
+		printf("Codigo do deck: %d\nNome do deck: %s\nNome do jogo vinculado: %s\nJogador responsavel: %s\nAno de criacao: %d\n\n", ExibeDecks.CodDeck, ExibeDecks.Titulo, ExibeDecks.NomeJogo,ExibeDecks.Jogador,ExibeDecks.Ano);
+		fread(&ExibeDecks, sizeof(Decks), 1, PtrExibDeck);
+	}
+	getch();	
+	fclose(PtrExibDeck);	
+}
+
+void BuscaDeckEmJogo(FILE *PtrBuscDeck, int Cod, int Vet[TF], int &TL)
+{
+	int i=0;
+	Decks BuscDeck;
+	rewind(PtrBuscDeck);
+	fread(&BuscDeck, sizeof(Decks), 1, PtrBuscDeck);
+	while(!feof(PtrBuscDeck))
+	{
+		if(BuscDeck.CodJogo == Cod)
+		{		
+			printf("\nCodigo do deck: %d\nNome do Deck: %s\n", BuscDeck.CodDeck, BuscDeck.Titulo);
+			Vet[i] = BuscDeck.CodJogo;
+			i++;
+			TL++;
+		}
+		fread(&BuscDeck, sizeof(Decks), 1, PtrBuscDeck);
+	}
+	
+}
+
+
+int BuscaCartaEmDeck(FILE *PtrCarta, int Codigo)
+{
+	int i=0;
+	Cartas RelCartaB;
+	rewind(PtrCarta);
+	fread(&RelCartaB, sizeof(Cartas), 1, PtrCarta);
+	while(!feof(PtrCarta))
+	{
+		if(RelCartaB.CodDeck == Codigo)
+		{		
+			printf("\nCartas vinculadas a esse deck: ");
+			printf("- %s\n", RelCartaB.NomeCarta);			
+			i++;	
+		}
+		fread(&RelCartaB, sizeof(Cartas), 1, PtrCarta);
+	}
+	if(i==0)
+		printf("\nEsse deck nao possui cartas vinculadas!\n");
+	else
+		printf("\nQuantidade de cartas vinculadas a esse deck: %d", i);
+}
 
 int BuscaJogo(FILE *PtrBuscaJogo, int Codigo)
 {
@@ -101,6 +151,37 @@ int BuscaDeck(FILE *PtrBuscaDeck, int Cod)
 	else 
 		return -1;	
 }
+
+void RelatorioDecks(char Deck[100], char Carta[100])
+{
+	FILE *PtrRelDeck = fopen(Deck, "rb");	
+	FILE *PtrRelCarta = fopen(Carta, "rb");
+	int pos;	
+	Decks RelDeck;
+	Cartas RelCarta;	
+	fread(&RelDeck, sizeof(Decks), 1, PtrRelDeck);
+	if(!feof(PtrRelDeck))
+	{
+		clrscr();
+		printf("\nDigite o codigo do deck: ");
+		scanf("%d", &RelDeck.CodDeck);
+		if(BuscaDeck(PtrRelDeck, RelDeck.CodDeck) == -1)
+			printf("\nDeck Inexistente!\n");
+		else
+		{
+			clrscr();
+			pos = BuscaDeck(PtrRelDeck, RelDeck.CodDeck);
+			fseek(PtrRelDeck, pos, 0);
+			fread(&RelDeck, sizeof(Decks), 1, PtrRelDeck);
+			printf("--> Deck: %s\n\nJogo: %s - (%d)\n\n- Jogador responsavel: %s\n\n", RelDeck.Titulo, RelDeck.NomeJogo, RelDeck.Ano, RelDeck.Jogador);			
+			BuscaCartaEmDeck(PtrRelCarta, RelDeck.CodDeck);			
+		}		
+	}
+	getch();
+	fclose(PtrRelDeck);
+	fclose(PtrRelCarta);
+}
+
 int Verif(FILE *PtrBuscaDeck, int CodJogo, int CodDeck, int pos)
 {
 	Decks CadDeck;
@@ -179,7 +260,7 @@ void CadastroCartas(char Carta[100], char Jogo[100])
 	scanf("%d", &CadJogo.CodJogo);
 	while(CadJogo.CodJogo != -1)
 	{
-		if(CadJogo.CodJogo == 0)
+		if(CadJogo.CodJogo == 0 && CadJogo.CodJogo < -1)
 		{
 			printf("\nO codigo do jogo deve ser maior que zero!");
 		}
@@ -262,8 +343,11 @@ void CadastroDecks(char Deck[100], char Jogo[100])
 					else
 						if(BuscaDeck(PtrCadDeck, CadDeck.CodDeck) == -1)
 						{
-							pos = BuscaJogo(PtrCadJogo, CadJogo.CodJogo);
+							pos = BuscaJogo(PtrCadJogo, CadJogo.CodJogo);							
 							CadDeck.CodJogo = CadJogo.CodJogo;
+							fseek(PtrCadJogo, pos, 0);
+							fread(&CadJogo, sizeof(Jogos),1,PtrCadJogo);
+							strcpy(CadDeck.NomeJogo, CadJogo.DescJogo);
 							printf("\nDigite o nome do deck: ");
 							fflush(stdin);
 							gets(CadDeck.Titulo);
@@ -272,8 +356,7 @@ void CadastroDecks(char Deck[100], char Jogo[100])
 							gets(CadDeck.Jogador);
 							printf("\nAno de criacao: ");
 							fflush(stdin);
-							scanf("%d", &CadDeck.Ano);
-							strcpy(CadDeck.NomeJogo, CadJogo.DescJogo);
+							scanf("%d", &CadDeck.Ano);							
 							fwrite(&CadDeck, sizeof(Decks), 1, PtrCadDeck);
 							printf("\n\n DECK CADASTRADO!\n\n");
 						}
@@ -336,39 +419,46 @@ void CadastroCartaInDeck(char Jogo[100], char Deck[100], char Carta[100])
 								{
 									pos = BuscaCarta(PtrCadCarta, CadCarta.CodCarta);
 									if(VerifC(PtrCadCarta, pos, CadJogo.CodJogo, CadDeck.CodDeck) == 0 && pos != -1)
-									{
+									{											
 										fseek(PtrCadCarta, pos, 0);
 										fread(&CadCarta, sizeof(Cartas), 1, PtrCadCarta);
 										CadCarta.CodDeck = CadDeck.CodDeck;									
-										printf("\nNome da carta: %s", CadCarta.NomeCarta);
-										fwrite(&CadCarta, sizeof(Cartas),1, PtrCadCarta);
-										printf("\n\nCARTA CADASTRADA!\n\n");																				
+										printf("\nNome da carta: %s\nCod deck: %d\n", CadCarta.NomeCarta, CadCarta.CodDeck);
+										printf("\nDeseja cadastrar a carta? (S-N): ");
+										if(toupper(getch()) == 'S')
+										{
+											fseek(PtrCadCarta, pos, 0);										
+											fwrite(&CadCarta, sizeof(Cartas), 1, PtrCadCarta);
+											printf("\n\nCARTA CADASTRADA!\n\n");																														
+										}
 									}
 									else
+									{									
 										if(VerifC(PtrCadCarta, pos, CadJogo.CodJogo, CadDeck.CodDeck) == 1)
 											printf("\nA carta com codigo %d nao pertence a esse jogo!\n", CadCarta.CodCarta);
 										if(VerifC(PtrCadCarta, pos, CadJogo.CodJogo, CadDeck.CodDeck) == 2)
 											printf("\nA carta com codigo %d pertence a outro deck!\n", CadCarta.CodCarta);
 										if(VerifC(PtrCadCarta, pos, CadJogo.CodJogo, CadDeck.CodDeck) == 3)
 											printf("\nA carta com codigo %d ja pertence a esse deck!\n", CadCarta.CodCarta);
-										else
-											if(BuscaCarta(PtrCadCarta, CadCarta.CodCarta) == -1)
-											{
-												fseek(PtrCadCarta, 0, 2);
-												fread(&CadCarta, sizeof(Cartas), 1, PtrCadCarta);
-												CadCarta.CodJogo = CadJogo.CodJogo;
-												CadCarta.CodDeck = CadDeck.CodDeck;
-												printf("\nDigite o nome da carta: ");
-												fflush(stdin);
-												gets(CadCarta.NomeCarta);
-												printf("\nDigite a descricao da carta: ");
-												fflush(stdin);
-												gets(CadCarta.DescCarta);
-												fwrite(&CadCarta, sizeof(Cartas), 1, PtrCadCarta);
-												printf("\nCARTA CADASTRADA!\n");										
-											}
+									}
+										
+									if(BuscaCarta(PtrCadCarta, CadCarta.CodCarta) == -1)
+									{
+										fseek(PtrCadCarta, 0, 2);
+										fread(&CadCarta, sizeof(Cartas), 1, PtrCadCarta);
+										CadCarta.CodJogo = CadJogo.CodJogo;
+										CadCarta.CodDeck = CadDeck.CodDeck;
+										printf("\nDigite o nome da carta: ");
+										fflush(stdin);
+										gets(CadCarta.NomeCarta);
+										printf("\nDigite a descricao da carta: ");
+										fflush(stdin);
+										gets(CadCarta.DescCarta);
+										fwrite(&CadCarta, sizeof(Cartas), 1, PtrCadCarta);
+										printf("\nCARTA CADASTRADA!\n");										
+									}
 									
-								}
+								}								
 								printf("\nDigite o codigo da carta: ");
 								scanf("%d", &CadCarta.CodCarta);
 							}							
@@ -387,16 +477,82 @@ void CadastroCartaInDeck(char Jogo[100], char Deck[100], char Carta[100])
 		printf("\t\n####CADASTRO DE CARTA(S) EM DECK(S)####");
 		printf("\nDigite o codigo do jogo(-1 - SAIR): ");
 		scanf("%d", &CadJogo.CodJogo);	
-	}
-	
-	
-	
-	
-	
+	}	
 	fclose(PtrCadCarta);
 	fclose(PtrCadJogo);
 	fclose(PtrCadDeck);	
 }
+
+/*
+void ExclusaoLogicaJogo(char Jogo[100], char Carta[100], char Deck[100])
+{
+	clrscr();
+	FILE *PtrExJogo = fopen(Jogo, "rb");
+	FILE *PtrExCarta = fopen(Carta, "rb");
+	FILE *PtrExDeck = fopen(Deck, "rb");
+	FILE *PtrExTempJogo, *PtrExTempDeck;
+	Jogos ExJogo;
+	Decks ExDeck;
+	int cod, PosJogo, PosCarta, PosDeck, Vet[TF], i=0, TL;
+	
+	printf("\t\n###EXCLUSAO DE JOGO###\n");
+	printf("\nDigite o codigo do jogo(-1 - SAIR): ");
+	scanf("%d", &ExJogo.CodJogo);
+	if(BuscaJogo(PtrExJogo, ExJogo.CodJogo) != -1)
+	{
+		PosJogo=BuscaJogo(PtrExJogo,ExJogo.CodJogo);
+		fseek(PtrExJogo, PosJogo, 0);
+		fread(&ExJogo, sizeof(Jogos), 1, PtrExJogo);		
+		printf("\nCodigo do jogo: %d\nNome do Jogo: %s", ExJogo.CodJogo, ExJogo.DescJogo);
+	//	PosCarta = BuscaCartaEmJogo(PtrExCarta, ExJogo.CodJogo);
+		BuscaDeckEmJogo(PtrExDeck, ExJogo.CodJogo, Vet, TL);
+		printf("\nDeseja excluir esse jogo? - (S/N): ");
+		if(toupper(getch()) == 'S')
+		{
+			PtrExTempJogo = fopen("TempJogo.dat", "wb");
+			PtrExTempDeck = fopen("TempDeck.dat", "wb");
+			cod = ExJogo.CodJogo;			
+			rewind(PtrExJogo);
+			fread(&ExJogo, sizeof(Jogos), 1, PtrExJogo);
+			while(!feof(PtrExJogo))
+			{
+				if(ExJogo.CodJogo != cod)				
+					fwrite(&ExJogo, sizeof(Jogos), 1,PtrExTempJogo);
+				
+				fread(&ExJogo, sizeof(Jogos), 1,PtrExJogo);				
+			}
+			fseek(PtrExDeck, Vet[i], 0);
+			fread(&ExDeck, sizeof(Decks), 1, PtrExDeck);
+			while(i<TL)
+			{							
+				fwrite(&ExJogo, sizeof(Jogos), 1, PtrExTempDeck);
+				i++;
+				fseek(PtrExDeck, Vet[i], 0);
+				fread(&ExDeck, sizeof(Decks), 1, PtrExDeck);
+			}
+				
+			fclose(PtrExJogo);
+			fclose(PtrExDeck);
+			fclose(PtrExTempJogo);
+			fclose(PtrExTempDeck);
+			remove(Jogo);
+			remove(Deck);
+			rename("TempJogo.dat", Jogo);
+			rename("TempDeck.dat", Deck);
+			printf("\nJogo excluido!\n");
+			printf("\nDeck(s) Excluido(s)\n");
+		}
+			
+	}	
+	else
+		printf("\nO Jogo com codigo %d nao existe!\n", ExJogo.CodJogo);
+	getch();
+	fclose(PtrExJogo);
+	fclose(PtrExDeck);
+	fclose(PtrExCarta);			
+}
+*/
+
 
 char Menu()
 {
@@ -406,6 +562,11 @@ char Menu()
 	printf("\n[B] - Cadastro de Cartas\n");
 	printf("\n[C] - Cadastro de Decks\n");
 	printf("\n[D] - Cadastro de Carta(s) no Deck(s)\n");
+	printf("\n[E] - Exibir Jogos\n");
+	printf("\n[F] - Exibir Cartas\n");
+	printf("\n[G] - Exibir Decks\n");
+	printf("\n[H] - Relatorio de Decks\n");
+	printf("\n[I] - Excluir Jogo\n");
 	return getch();
 }
 
@@ -425,7 +586,17 @@ void Executar(void)
 			case 'C': CadastroDecks("Decks.dat", "Jogos.dat");
 					  break;
 			case 'D': CadastroCartaInDeck("Jogos.dat", "Decks.dat", "Cartas.dat");
-					  break;		
+					  break;
+			case 'E': ExibirJogos("Jogos.dat");
+					  break;
+			case 'F': ExibirCartas("Cartas.dat");
+					  break;
+			case 'G': ExibirDecks("Decks.dat");	
+					  break;
+			case 'H': RelatorioDecks("Decks.dat", "Cartas.dat");
+					  break;
+			//case 'I': ExclusaoLogicaJogo("Jogos.dat", "Cartas.Deck", "Decks.dat");
+			//		  break;	
 		}
 	}while(op!=27);
 }
