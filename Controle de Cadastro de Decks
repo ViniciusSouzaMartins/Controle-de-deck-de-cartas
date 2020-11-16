@@ -648,3 +648,192 @@ int main()
 	fclose(PtrJogo);	
 	Executar();
 }
+
+
+//EXCLUSÃO LÓGICA DO JOGO
+
+void ExclusaoLogicaCartas (char Nome[100], int cod)
+{
+	TpCarta Cartas;
+	FILE *PtrArq= fopen (Nome, "rb+");
+	fread(&Cartas,sizeof(TpCartas),1,PtrArq);
+	while(!feof(PtrArq))
+	{
+		if(Cartas.CodJogo == cod)
+		{
+			Cartas.Status='I';
+			fseek(PtrArq,ftell(PtrArq)-sizeof(TpCarta),0);
+			fwrite(Cartas,sizeof(TpCartas),1,PtrArq);
+		}
+		fread(&Cartas,sizeof(TpCartas),1,PtrArq);
+	}
+	fclose(PtrArq);
+}
+
+void ExclusaoLogicaDecks (char Nome[100], int cod)
+{
+	TpDeck Decks;
+	FILE *PtrArq = fopen (Nome, "rb+");
+	fread(&Decks,sizeof(TpDeck),1,PtrArq);
+	while(!feof(PtrArq))
+	{
+		if(Decks.CodJogo == cod)
+		{
+			Decks.Status='I';
+			fseek(PtrArq,ftell(PtrArq)-sizeof(TpDeck),0);
+			fwrite(Decks,sizeof(TpDeck),1,PtrArq);
+		}
+		fread(&Decks,sizeof(TpDecks),1,PtrArq);
+	}
+	fclose(PtrArq);
+}
+
+void ExibirJogos(char Jogo[100]) //fiz so p ver se tava dando certo
+{
+	Jogos ExibeJogos;	
+	FILE *PtrExibJogo = fopen(Jogo,"rb");
+	fread(&ExibeJogos, sizeof(Jogos), 1, PtrExibJogo);
+	while(!feof(PtrExibJogo) && ExibeJogos.Status=='A')
+	{
+		printf("Codigo do jogo: %d\nNome do jogo: %s\n\n", ExibeJogos.CodJogo, ExibeJogos.DescJogo);
+		fread(&ExibeJogos, sizeof(Jogos), 1, PtrExibJogo);
+	}
+	getch();	
+	fclose(PtrExibJogo);	
+}
+
+void ExclusaoLogicaJogo(char Jogo[100]) 
+{
+	FILE *PtrExJogo = fopen(Jogo, "rb+");
+	Jogos ExJogo;
+	
+	printf("\t\n###EXCLUSAO DE JOGO###\n");
+	printf("\nDigite o codigo do jogo(-1 - SAIR): ");
+	scanf("%d", &ExJogo.CodJogo);
+	posJogo = BuscaJogo(PtrExJogo, ExJogo.CodJogo);
+	if(posJogo>=0)
+	{
+		fseek(PtrExJogo, PosJogo, 0);
+		fread(&ExJogo, sizeof(Jogos), 1, PtrExJogo);		
+		printf("\nCodigo do jogo: %d\nNome do Jogo: %s", ExJogo.CodJogo, ExJogo.DescJogo);
+		printf("\nDeseja excluir logicamente este jogo? - (S/N): ");
+		if(toupper(getch()) == 'S')
+		{
+			ExJogo.Status = 'I'			
+			fseek(PtrExJogo, PosJogo, 0);
+			fwrite(ExJogo, sizeof(Jogos), 1, PtrExJogo);
+			ExcluiLogicaCartas(NomeDoArquivo,ExJogo.CodJogo);//tem q arrumar esses parametros rs
+	  		ExcluiLogicaDecks(NomeDoArquivo,ExJogo.CodJogo);
+	  		printf("Jogo Excluido Logicamente!\n");
+	    }
+	}	
+	else
+		printf("\nO Jogo com codigo %d nao existe!\n", ExJogo.CodJogo);
+	getch();
+	fclose(PtrExJogo);
+}
+
+
+//EXCLUSÃO LÓGICA DAS CARTAS
+void ExcluiCartasLogic (char Nome[100]) 
+{
+	int cod, pos, car;
+	FILE *PtrArq = fopen(Nome,"rb+");
+	TpCarta Cartas;
+	printf("###EXCLUSAO DE CARTAS###\n");
+	printf("Digite o codigo do jogo:\n");
+	scanf("%d",&cod);
+	while(cod>0)
+	{
+		pos = BuscaJogo(PtrArq,cod);
+		if(pos>0)
+		{
+			printf("Digite o codigo da carta:\n");
+			scanf("%d",&car);
+			pos = BuscaCarta(PtrArq,car);
+			if(pos>0)
+			{
+				fseek(PtrArq,pos,0);
+				fread(&Cartas,sizeof(TpCarta),1,PtrArq);
+				printf("Codigo da carta:%d\nNome da Carta:%s\nDescricao:%s\n",Cartas.CodCarta,Cartas.NomeCarta,Cartas.DescCarta);
+				printf("\nDeseja excluir logicamente esta carta? - (S/N): ");
+				if(toupper(getch()) == 'S')
+				{
+					Cartas.Status='I';
+					fseek(PtrArq, pos, 0);
+					fwrite(Cartas, sizeof(TpCarta), 1, PtrArq);
+					printf("Carta Excluida!\n";)
+				}
+			}
+			else 
+				printf("Carta nao existente!\n");
+		}
+		else 
+			printf("Jogo nao existente!\n");
+		printf("Digite o codigo do jogo:\n");
+		scanf("%d",&cod);
+	}	
+	fclose(PtrArq);
+}
+
+
+//EXCLUSÃO LÓGICA DOS DECKS 
+void ExcluiCartasDoDeck(char Nome[100], int deck)
+{
+	FILE *PtrArq = fopen(Nome,'rb+');
+	TpCarta Cartas;
+	fread(&Cartas,sizeof(TpCarta),1,PtrArq);
+	while(!feof(PtrArq))
+	{
+		if(Cartas.CodDeck==deck)
+		{
+			Cartas.Status='I';
+			fseek(PtrArq,ftell(PtrArq)-sizeof(TpCarta),0);
+			fwrite(Cartas,sizeof(TpCartas),1,PtrArq);
+		}
+		fread(&Cartas,sizeof(TpCarta),1,PtrArq);
+	}
+	fclose(PtrArq);
+}
+
+void ExclusaoDeckLogic (char Nome[100])
+{
+	int cod, pos, deck;
+	FILE *PtrArq = fopen (Nome,"rb+");
+	TpDeck Decks;
+	printf("###EXCLUSAO DE DECKS###\n");
+	printf("Digite o codigo do jogo:\n");
+	scanf("%d",&cod);
+	while(cod>0)
+	{
+		pos = BuscaJogo(PtrArq,cod);
+		if(cod>0)
+		{
+			printf("Digite o codigo do Deck:\n");
+			scanf("%d",&deck);
+			pos = BuscaDeck(PtrArq,deck);
+			if(pos>0)
+			{
+				fseek(PtrArq,pos,0);
+				fread(&Decks,sizeof(TpDeck),1,PtrArq);
+				printf("Nome do Jogo:%s\nJogador Responsavel:%s\n",Decks.NomeJogo,Decks.Jogador);
+				printf("\nDeseja excluir logicamente esta carta? - (S/N): ");
+				if(toupper(getch()) == 'S')
+				{
+					Decks.Status='I';
+					fseek(PtrArq,pos,0);
+					fwrite(Decks,sizeof(TpDeck),1,PtrArq);	
+					ExcluiCartasDoDeck(NomeArquivo,deck);
+					printf("Deck excluido!\n";)
+				}
+			}
+			else 
+				printf("Deck Inexistente!\n");
+		}
+		else
+			printf("Jogo Inexistente!\n");
+		printf("Digite o codigo do jogo:\n");
+		scanf("%d",&cod);	
+	}
+	fclose(PtrArq);
+}
