@@ -1,0 +1,1345 @@
+#include<stdio.h>
+#include<ctype.h>
+#include<windows.h>
+#include<stdlib.h>
+#include<string.h>
+#include<conio2.h>
+
+
+#define TF 100
+
+//STRUCTS!
+struct TpJogo
+{
+	int CodJogo;
+	char Descricao[300];
+};
+
+struct TpCarta
+{
+	int CodCarta, CodJogo, CodDeck;
+	char NomeCarta[30], Descricao[300];	
+};
+
+struct TpDeck
+{
+	int CodDeck, Ano, CodJogo;
+	char Titulo[30], Jogador[30], NomeJogo[300];
+};
+//STRUCT^
+
+
+//PROTOTIPOS DAS FUNCOES!
+void CadastroJogos(TpJogo Jogos[], int &TLJ);
+void CadastroCartas(TpJogo Jogos[], int &TLJ, TpCarta Cartas[], int &TLC);
+void CadastroDecks(TpJogo Jogos[], int &TLJ, TpDeck Decks[], int &TLD, TpCarta Cartas[], int &TLC);
+void CadastroCDeck(TpDeck Decks[], int &TLD, TpCarta Cartas[], int &TLC, TpJogo Jogos[], int &TLJ);
+int BuscaJogo(TpJogo Jogos[], int TLJ, int Codigo);
+int BuscaCarta(TpCarta Cartas[], int TLC, int Codigo);
+int BuscaDeck(TpDeck Decks[], int TLD, int Codigo);
+int BuscaCartaEmJogo(TpCarta Cartas[], int TLC, int Codigo, int VetCartas[]);
+int BuscaDeckEmJogo(TpDeck Decks[],int TLD,int codigo,int VetDecks[]);
+int BusCartaEmDeck(int &AuxCod, TpCarta Cartas[], int TLC, int VetCartas[]);
+int BusCJ(TpCarta Cartas[], int &TLC, int CodJogo, int CodCarta, int pos);
+int BusCD(TpDeck Decks[], int TLD, int CodJogo, int CodDeck, int pos);
+int BusC(TpCarta Cartas[], int pos, int CodJogo, int CodDeck, int TLC);
+void MostrarJogos(TpJogo Jogos[], int TLJ);
+void MostrarCartas(TpCarta Cartas[], int TLC);
+void MostrarDecks(TpDeck Decks[], int TLD);
+void RelDeck(TpDeck Decks[], int TLD, TpJogo Jogos[], int TLJ, TpCarta Cartas[], int TLC);
+void ExcluFisicaJogo(TpJogo Jogos[], int &TLJ, TpCarta Cartas[], int &TLC, TpDeck Decks[], int &TLD);
+void ExcluFisicaCarta(TpCarta Cartas[], int &TLC);
+void ExcluFisicaDeck(TpDeck Decks[], int &TLD, TpCarta Cartas[], int &TLC);
+char menu();
+char menu2();
+char menu3();
+char menu4();
+void Executar(void);
+void cadastrarJogosAutomatico(TpJogo Jogos[], int &TLJ);
+void cadastrarCartasAutomatico(TpCarta Cartas[], int &TLC, int Verificador);
+void cadastrarDecksAutomatico(TpDeck Decks[], int &TLD, TpCarta Cartas[], int &TLC);
+void Carregando();
+void Inicio(TpCarta Cartas[]);
+
+int main(void)
+{		
+	Executar();	
+}
+
+//executar com repartimento de menus, para maior clareza nas opcoes!
+void Executar(void)
+{
+	TpJogo CadJogos[TF];
+	TpCarta CadCartas[TF];
+	TpDeck CadDecks[TF];
+	
+	int Verificador = 0, TL=0, TLCarta=0, TLDeck=0, VetCartas[TF], j;
+	
+	char op, op2, op3, op4;
+		
+	
+	textcolor(0); //cor preta em todo os textos!
+	textbackground(7);  //Fundo cinza!	
+		
+	Inicio(CadCartas);
+	 	
+	do
+	{
+		op = toupper(menu());
+		
+		switch(op)
+		{
+			
+			case 'A':	op2 = toupper(menu2());						
+						switch(op2)
+						{							
+							case 'A':	CadastroJogos(CadJogos, TL);										
+										break;
+							case 'B':	CadastroCartas(CadJogos, TL, CadCartas, TLCarta);										
+										break;
+							case 'C':	CadastroDecks(CadJogos, TL, CadDecks, TLDeck, CadCartas, TLCarta);										
+										break;
+							case 'D':	CadastroCDeck(CadDecks, TLDeck, CadCartas, TLCarta, CadJogos, TL);
+										getch();
+										break;
+							case 'E':	cadastrarJogosAutomatico(CadJogos, TL);
+										break;
+							case 'F':	cadastrarCartasAutomatico(CadCartas, TLCarta, Verificador);											
+										break;
+							case 'G':	cadastrarDecksAutomatico(CadDecks, TLDeck, CadCartas, TLCarta);
+										Verificador = 1;										
+										break;						
+						}
+						break;
+			case 'B':	op3 = toupper(menu3());
+						switch(op3)
+						{														
+							case 'A':	MostrarJogos(CadJogos, TL);
+										getch();
+										break;
+							case 'B':	MostrarCartas(CadCartas, TLCarta);
+										getch();
+										break;									
+							case 'C':	MostrarDecks(CadDecks, TLDeck);
+										break;										
+							case 'D':	RelDeck(CadDecks, TLDeck, CadJogos, TL, CadCartas, TLCarta);
+										getch();
+										break;							
+						}
+						break;
+			case 'C':	op4 = toupper(menu4());
+						switch(op4)
+						{								
+							case 'A': 	ExcluFisicaJogo(CadJogos, TL, CadCartas, TLCarta, CadDecks, TLDeck);
+										getch();
+										break;
+							case 'B':	ExcluFisicaCarta(CadCartas, TLCarta);										
+										getch();
+										break;
+							case 'C':	ExcluFisicaDeck(CadDecks, TLDeck, CadCartas, TLCarta);	
+										getch();
+										break;						
+						}
+						break;
+		}			
+	}while(op != 13);	
+}
+
+//Menu principal
+char menu(void)
+{
+	
+	system("cls");
+
+	gotoxy(45,10);
+	printf("#### OPCOES DO MENU ####\n\n");
+	gotoxy(45,12);
+	printf("[A] - #### CADASTRAR ####\n\n");
+	gotoxy(45,14);
+	printf("[B] - #### EXIBIR ####\n\n");
+	gotoxy(45,16);
+	printf("[C] - #### EXCLUIR ####\n\n");	
+	
+	gotoxy(45,17);
+	return getch();	
+}
+
+//Menu para Cadastrar
+char menu2(void)
+{
+	system("cls");
+	gotoxy(40,2);
+	printf("\t\t#### MENU DE CADASTRO ####\n\n");
+	gotoxy(40,6);
+	printf("[A] - #### CADASTRAR JOGO ####\n\n");
+	gotoxy(40,8);
+	printf("[B] - #### CADASTRAR CARTA ####\n\n");
+	gotoxy(40,10);
+	printf("[C] - #### CADASTRAR DECK ####\n\n");
+	gotoxy(40,12);
+	printf("[D] - #### CADASTRAR CARTAS EM UM DECK ####\n\n");
+	gotoxy(40,14);
+	printf("[E] - #### CADASTRAR JOGOS AUTOMATICAMENTE ####\n\n");
+	gotoxy(40,16);
+	printf("[F] - #### CADASTRAR CARTAS AUTOMATICAMENTE ####\n\n");
+	gotoxy(40,18);
+	printf("[G] - #### CADASTRAR DECKS AUTOMATICAMENTE ####\n\n");
+	gotoxy(40,20);
+	return getch();
+}
+
+//Menu para exibir
+char menu3(void)
+{
+	system("cls");
+	gotoxy(40,2);
+	printf("\t\t#### MENU DE EXIBICAO ####\n\n");
+	gotoxy(40,6);
+	printf("[A] - #### EXIBIR JOGO(S) ####\n\n");
+	gotoxy(40,8);
+	printf("[B] - #### EXIBIR CARTA(S) ####\n\n");
+	gotoxy(40,10);
+	printf("[C] - #### EXIBIR DECK(S) ####\n\n");
+	gotoxy(40,12);
+	printf("[D] - #### EXIBIR RELATORIO(S) DE DECK(S) ####");
+	gotoxy(40,14);
+	return getch();
+}
+
+//Menu para exclusao
+char menu4(void)
+{
+	system("cls");
+	gotoxy(40,2);
+	printf("\t#### MENU DE EXCLUSAO ####\n\n");
+	gotoxy(40,6);
+	printf("[A] - #### EXCLUIR JOGO ####\n\n");
+	gotoxy(40,8);
+	printf("[B] - #### EXCLUIR CARTA ####\n\n");
+	gotoxy(40,10);
+	printf("[C] - #### EXCLUIR DECK ####\n\n");
+	gotoxy(40,12);
+	return getch();
+}
+//Funcao para literalmente para aparecer "Carregando..." e parecer q está carregando!
+void Carregando()
+{
+	system("cls");	
+	gotoxy(50,15);
+	Sleep(90);
+	printf("Carregando..."); 
+	gotoxy(70,15);
+	for(INT i=0; i<10; i++)
+	{
+		
+		Sleep(70);
+    	printf(" ");
+				
+	}	
+    printf("\n");
+    system("cls");
+}
+//Funcao Para apresentar os autores!
+void Inicio(TpCarta Cartas[])
+{
+	system("cls");	
+	gotoxy(45,6);
+	Sleep(90);
+	printf("--- CONTROLE DE DECKS DE CARTAS ---");
+	gotoxy(45,10);
+	printf("---\t\t Autores\t   ---");
+	gotoxy(45,14);
+	printf("---\t  VINICIUS SOUZA MARTINS   ---");
+	gotoxy(45,16); 
+	printf("---\tKAROLAINE SERODIO MANDROTI ---");
+	gotoxy(45,18);
+	printf("---\t  LEANDRO AUGUSTO MENEZES  ---");
+	gotoxy(90,11);
+	for(int i=0; i<10; i++)
+	{		
+		Sleep(200);
+    	printf(" ");
+				
+	}	
+    Cartas[0].CodDeck = 0;
+	Cartas[1].CodDeck = 0;
+	Cartas[2].CodDeck = 0;
+	Cartas[3].CodDeck = 0;
+	Cartas[4].CodDeck = 0;
+	Cartas[5].CodDeck = 0;
+	Cartas[6].CodDeck = 0;
+	Cartas[7].CodDeck = 0;
+	Cartas[8].CodDeck = 0;
+    system("cls");
+}
+
+//Funcao para cadastrar jogos!
+void CadastroJogos(TpJogo Jogos[], int &TLJ)
+{
+	system("cls");
+	int AuxCodJ=0;
+	gotoxy(45,4);	
+	printf("\t####CADASTRO DE JOGOS####");
+	gotoxy(45,8);
+	printf("Digite o codigo do jogo(-1 - SAIR): ");
+	scanf("%d", &AuxCodJ);
+	while(AuxCodJ != -1 && TLJ<TF)
+	{
+		
+		if(BuscaJogo(Jogos, TLJ, AuxCodJ) == -1 && AuxCodJ > 0)
+		{
+			gotoxy(45,10);				
+			printf("Digite o nome do Jogo: ");
+			fflush(stdin);			
+			gets(Jogos[TLJ].Descricao);
+			gotoxy(45,10);	
+			Jogos[TLJ].CodJogo = AuxCodJ;
+			TLJ++;
+			Carregando();
+			gotoxy(45,13);						
+			printf("|-------------------------------|");
+			gotoxy(45,14);					
+			printf("|JOGO CADASTRADO COM SUCESSO!!! |");			
+			gotoxy(45,15);
+			printf("|-------------------------------|");
+			Sleep(1500);			
+			system("cls");				
+		}
+		else
+		{
+			system("cls");
+			gotoxy(40,12);
+			if(AuxCodJ == 0)
+			{
+				
+				printf("O Codigo do jogo deve ser maior que zero!");
+				Sleep(1500);
+				system("cls");			
+			}
+			else
+			{
+				gotoxy(45,14);
+				printf("O JOGO COM CODIGO %d JA EXISTE!", AuxCodJ);
+				gotoxy(76,14);
+				Sleep(1500);
+				system("cls");
+			}
+		}
+		gotoxy(45,4);		
+		printf("\t####CADASTRO DE JOGOS####");
+		gotoxy(45,8);
+		printf("Digite o codigo do jogo(-1 - SAIR): ");		
+		scanf("%d", &AuxCodJ);
+		gotoxy(45,8);	
+	}		
+}
+
+//Funcao para cadastrar Cartas!
+void CadastroCartas(TpJogo Jogos[], int &TLJ, TpCarta Cartas[], int &TLC)
+{
+	system("cls");
+	int CodJogo, CodCarta=0;
+	gotoxy(45,4);
+	printf("\t####CADASTRO DE CARTAS####");
+	gotoxy(45,8);
+	printf("Digite o codigo do Jogo(-1 - SAIR): ");
+	scanf("%d", &CodJogo);
+	while(CodJogo != -1 && TLJ<TF)
+	{				
+		if(CodJogo == 0)
+		{
+			system("cls");
+			gotoxy(45,14);
+			printf("O codigo do jogo deve ser maior que zero!");
+			Sleep(1500);
+		}
+		else
+		{	
+			if(BuscaJogo(Jogos, TLJ, CodJogo) == -1)
+			{
+				system("cls");
+				gotoxy(45,14);
+				printf("O JOGO COM CODIGO %d NAO EXISTE!!!", CodJogo);
+				Sleep(1500);
+				system("cls");
+			}
+			else
+			{
+				gotoxy(45,10);
+				printf("Digite o Codigo da Carta(-1 - SAIR): ");
+				scanf("%d", &CodCarta);	
+				while(CodCarta != -1 && TLC<TF)
+				{				
+					if(CodCarta == 0)
+					{	
+						system("cls");
+						gotoxy(40,14);				
+						printf(" O codigo da carta deve ser maior que zero!\n");
+						Sleep(1500);
+						system("cls");
+					}
+					else
+						if(BuscaCarta(Cartas,TLC, CodCarta) == -1)
+						{
+							Cartas[TLC].CodJogo = CodJogo;
+							Cartas[TLC].CodCarta = CodCarta;
+							Cartas[TLC].CodDeck = 0;
+							gotoxy(45,12);
+							printf("Digite o nome da Carta: ");
+							fflush(stdin);
+							gets(Cartas[TLC].NomeCarta);
+							fflush(stdin);
+							gotoxy(45,14);
+							printf("Descricao: ");
+							gets(Cartas[TLC].Descricao);
+							TLC++;
+							Carregando();
+							gotoxy(45,13);
+							printf("|-------------------------------|");
+							gotoxy(45,14);					
+							printf("|CARTA CADASTRADA COM SUCESSO!!!|");			
+							gotoxy(45,15);
+							printf("|-------------------------------|\n\n");
+							Sleep(1500);
+							system("cls");														
+						}
+						else
+							if(BuscaCarta(Cartas,TLC,CodCarta) != -1)
+							{							
+								system("cls");
+								gotoxy(45,14);
+								printf("A CARTA COM CODIGO %d JA EXISTE!!!", CodCarta);
+								Sleep(1500);
+								system("cls");
+							}
+					gotoxy(45,8);
+					printf("Digite o Codigo da Carta(-1 - SAIR): ");
+					scanf("%d", &CodCarta);
+				}			
+			}			
+		}	
+		system("cls");
+		gotoxy(45,4);
+		printf("\t####CADASTRO DE CARTAS####");
+		gotoxy(45,8);
+		printf("Digite o codigo do Jogo(-1 - SAIR): ");
+		scanf("%d", &CodJogo);		
+	}				
+}
+	
+
+
+//funcao para cadastrar decks!
+void CadastroDecks(TpJogo Jogos[], int &TLJ, TpDeck Decks[], int &TLD, TpCarta Cartas[], int &TLC)
+{
+	system("cls");
+	int CodJogo, CodDeck=0, pos;
+	gotoxy(45,4);
+	printf("\t####CADASTRO DE DECKS####");
+	gotoxy(45,8);
+	printf("Digite o codigo do Jogo(-1 - SAIR): ");
+	scanf("%d", &CodJogo);
+	while(CodJogo != -1 && TLJ<TF)
+	{				
+		if(CodJogo == 0)
+		{
+			system("cls");
+			gotoxy(45,14);
+			printf("O codigo do jogo deve ser maior que zero!");
+			Sleep(1000);
+			system("cls");
+		}
+		else
+		{	
+			if(BuscaJogo(Jogos, TLJ, CodJogo) == -1)
+			{
+				system("cls");
+				gotoxy(45,14);
+				printf("O JOGO COM CODIGO %d NAO EXISTE!!!", CodJogo);
+				Sleep(1000);
+				system("cls");
+			}
+			else
+			{
+				gotoxy(45,10);
+				printf("Digite o Codigo do Deck(-1 - SAIR): ");
+				scanf("%d", &CodDeck);	
+				while(CodDeck != -1 && TLD<TF)
+				{				
+					if(CodDeck == 0)
+					{	
+						system("cls");
+						gotoxy(45,14);				
+						printf("O codigo do Deck deve ser maior que zero!");
+						Sleep(1000);
+						system("cls");
+					}
+					else
+						if(BuscaDeck(Decks,TLD, CodDeck) == -1)
+						{
+							pos = BuscaJogo(Jogos, TLJ, CodJogo);
+							Decks[TLD].CodJogo = CodJogo;
+							Decks[TLD].CodDeck = CodDeck;
+							gotoxy(45,12);
+							printf("Digite o nome do Deck: ");
+							fflush(stdin);
+							gets(Decks[TLD].Titulo);
+							fflush(stdin);
+							gotoxy(45,14);
+							printf("Jogador Responsavel: ");
+							gets(Decks[TLD].Jogador);
+							fflush(stdin);
+							gotoxy(45,16);
+							printf("Ano de criacao: ");
+							scanf("%d", &Decks[TLD].Ano);
+							strcpy(Decks[TLD].NomeJogo, Jogos[pos].Descricao);
+							TLD++;
+							Carregando();
+							gotoxy(45,13);
+							printf("|-------------------------------|");
+							gotoxy(45,14);					
+							printf("|DECK CADASTRADO COM SUCESSO!!! |");			
+							gotoxy(45,15);
+							printf("|-------------------------------|\n\n");
+							Sleep(1500);
+							system("cls");								
+						}
+						else
+							if(BuscaDeck(Decks,TLD,CodDeck) != -1)
+							{
+								system("cls");
+								gotoxy(45,14);
+								printf("O DECK COM CODIGO %d JA EXISTE!!!", CodDeck);
+								Sleep(1000);
+								system("cls");
+							}
+				gotoxy(45,10);
+				printf("Digite o Codigo do Deck(-1 - SAIR): ");
+				scanf("%d", &CodDeck);
+				}
+			
+			}			
+		}
+	
+		system("cls");
+		gotoxy(45,4);
+		printf("\t####CADASTRO DE DECKS####\n\n");
+		gotoxy(45,8);
+		printf("Digite o codigo do Jogo(-1 - SAIR): ");
+		scanf("%d", &CodJogo);		
+	}
+	
+			
+				
+}
+
+
+//Funcao para cadastrar cartas em um determinado deck!
+void CadastroCDeck(TpDeck Decks[], int &TLD, TpCarta Cartas[], int &TLC, TpJogo Jogos[], int &TLJ)
+{
+	system("cls");
+	int CodJogo=0, CodDeck=0, CodCarta=0, pos=0, x=0;
+	gotoxy(45,4);
+	printf("\t####CADASTRO DE CARTAS EM DECKS####");
+	gotoxy(45,8);
+	printf("Digite o codigo do Jogo(-1 - SAIR): ");
+	scanf("%d", &CodJogo);
+	while(CodJogo != -1 && TLJ<TF)
+	{				
+		if(CodJogo == 0)
+		{
+			system("cls");
+			gotoxy(45,14);
+			printf("O codigo do jogo deve ser maior que zero!");
+			Sleep(1000);
+			system("cls");
+		}
+		else
+		{	
+			if(BuscaJogo(Jogos, TLJ, CodJogo) == -1 && CodJogo > 0)
+			{
+				system("cls");
+				gotoxy(45,14);
+				printf("O JOGO COM CODIGO %d NAO EXISTE!!!", CodJogo);
+				Sleep(1000);
+				system("cls");
+			}
+			else
+			{
+				gotoxy(45,10);
+				printf("Digite o Codigo do Deck(-1 - SAIR): ");
+				scanf("%d", &CodDeck);	
+				while(CodDeck != -1 && TLD<TF)
+				{								
+					if(CodDeck == 0)
+					{	
+						system("cls");
+						gotoxy(45,14);				
+						printf("O codigo do Deck deve ser maior que zero!");
+						Sleep(1000);
+						system("cls");
+					}					
+					else
+						pos = BuscaDeck(Decks, TLD, CodDeck);
+						if(BusCD(Decks, TLD, CodJogo, CodDeck, pos) == 1)
+						{
+							gotoxy(45,12);
+							printf("Digite o codigo da carta(-1 - SAIR): ");
+							scanf("%d", &CodCarta);
+							while(CodCarta != -1 && TLC<TF)
+							{
+								if(CodCarta == 0)
+								{
+									system("cls");
+									gotoxy(45,14);
+									printf("O codigo da carta deve ser maior que zero!");
+									Sleep(1000);
+									system("cls");
+								}
+								else
+								{
+									pos = BuscaCarta(Cartas, TLC, CodCarta);
+									if(BusC(Cartas, pos, CodJogo, CodDeck, TLC) == 0 && pos != -1)
+									{
+										Cartas[pos].CodDeck = CodDeck;										
+										Carregando();
+										gotoxy(45,11);
+										printf("Nome da Carta: %s", Cartas[pos].NomeCarta);
+										gotoxy(45,13);
+										printf("|-------------------------------|");										
+										gotoxy(45,14);					
+										printf("|CARTA CADASTRADA COM SUCESSO!!!|");			
+										gotoxy(45,15);
+										printf("|-------------------------------|");
+										Sleep(1500);
+										system("cls");											
+									}
+									else
+										if(BusC(Cartas, pos, CodJogo, CodDeck, TLC) == 1) 
+										{	
+											system("cls");
+											gotoxy(45,14);										
+											printf("A carta com codigo %d nao pertence a esse jogo!!!", CodCarta);									
+											Sleep(1000);
+											system("cls");
+										}
+									else
+										if(BusC(Cartas, pos, CodJogo, CodDeck, TLC) == 2)
+										{
+											system("cls");
+											gotoxy(45,14);
+											printf("A carta com codigo %d pertence a outro deck!!!", CodCarta);	
+											Sleep(1000);
+											system("cls");
+										}
+									else
+										if(BusC(Cartas, pos, CodJogo, CodDeck, TLC) == 3)
+										{
+											system("cls");
+											gotoxy(45,14);
+											printf("A carta com codigo %d ja percente a esse deck!!!", CodCarta);
+											Sleep(1000);
+											system("cls");
+										}										
+									if(BuscaCarta(Cartas, TLC, CodCarta) == -1)
+									{
+										Cartas[TLC].CodCarta = CodCarta;
+										Cartas[TLC].CodJogo = CodJogo;
+										Cartas[TLC].CodDeck = CodDeck;
+										gotoxy(45,14);
+										printf("Digite o nome da carta: ");
+										fflush(stdin);
+										gets(Cartas[TLC].NomeCarta);
+										gotoxy(45,16);
+										printf("Descricao da Carta: ");
+										fflush(stdin);
+										gets(Cartas[TLC].Descricao);
+										TLC++;
+										Carregando();										
+										gotoxy(45,13);
+										printf("|-------------------------------|");										
+										gotoxy(45,14);					
+										printf("|CARTA CADASTRADA COM SUCESSO!!!|");			
+										gotoxy(45,15);
+										printf("|-------------------------------|");
+										Sleep(1500);
+										system("cls");
+									}									
+								}
+								system("cls");
+								gotoxy(45,12);
+								printf("Digite o codigo da carta(-1 - SAIR): ");
+								scanf("%d", &CodCarta);
+							}																					
+						}
+						else
+							if(BusCD(Decks, TLD, CodJogo, CodDeck, pos) == 0 && BuscaDeck(Decks, TLD, CodDeck) != -1)
+							{							
+								system("cls");
+								gotoxy(45,14);
+								printf("O Deck com codigo %d esta vinculado a outro jogo!", CodDeck);
+								Sleep(1000);
+								system("cls");
+							}
+							else
+							{							
+								system("cls");
+								gotoxy(45,14);
+								printf("O Deck com codigo %d nao existe!", CodDeck);
+								Sleep(1000);
+								system("cls");		
+							}
+					system("cls");
+					gotoxy(45,10);
+					printf("Digite o Codigo do Deck(-1 - SAIR): ");
+					scanf("%d", &CodDeck);
+					
+				}
+			
+			}			
+		}	
+		system("cls");
+		gotoxy(45,4);
+		printf("\t####CADASTRO DE CARTAS EM DECKS####");
+		gotoxy(45,8);
+		printf("Digite o codigo do Jogo(-1 - SAIR): ");
+		scanf("%d", &CodJogo);		
+	}				
+}
+
+//Funcao para mostrar os jogos existentes!
+void MostrarJogos(TpJogo Jogos[], int TLJ)
+{
+	int x=4;
+	system("cls");
+	if(TLJ>0)			
+		for(int i=0; i<TLJ; i++)
+		{			
+			gotoxy(35,x);
+			printf("Codigo do Jogo: %d \t Nome do jogo: \t%s", Jogos[i].CodJogo, Jogos[i].Descricao);
+			Sleep(500);
+			x = x + 2;				
+		}
+	else
+	{	
+		system("cls");
+		gotoxy(45,14);
+		printf("Nao Existem jogos cadastrados!");			
+	}
+	
+}
+
+//Funcao para mostrar as cartas existentes!
+void MostrarCartas(TpCarta Cartas[], int TLC)
+{
+	int x=4;
+	
+	if(TLC>0)		
+		for(int i=0; i<TLC; i++)
+		{	
+			system("cls");
+			gotoxy(40,x);	
+			printf("Codigo da Carta: %d", Cartas[i].CodCarta);
+			gotoxy(40,x+2);
+			printf("Nome da Carta : %s", Cartas[i].NomeCarta);
+			gotoxy(40,x+4);
+			printf("Codigo do Jogo a que pertence: %d", Cartas[i].CodJogo);
+			gotoxy(45,x+6);
+			printf("----Descricao da Carta----");
+			gotoxy(1,x+8);
+			printf("%s", Cartas[i].Descricao);
+			gotoxy(40,x+10);
+			printf("\n\n");
+			getch();
+						
+		}
+	else
+	{	
+		system("cls");
+		gotoxy(45,14);
+		printf("Nao Existe Cartas Cadastradas!");
+		Sleep(500);		
+	}
+	
+}
+
+//Funcao para mostrar os decks existentes!
+void MostrarDecks(TpDeck Decks[], int TLD)
+{
+	int x=4;
+	system("cls");
+	if(TLD>0)
+	{			
+		for(int i=0; i<TLD; i++)
+		{	
+			gotoxy(40,x);	
+			printf("Codigo do Deck: %d", Decks[i].CodDeck);
+			gotoxy(40,x+2);
+			printf("Nome do Deck: %s", Decks[i].Titulo);
+			gotoxy(40,x+4);	
+			printf("Jogador Responsavel: %s", Decks[i].Jogador);
+			gotoxy(40,x+6);	
+			printf("Ano de Criacao: %d", Decks[i].Ano);
+			gotoxy(40,x+8);	
+			printf("Nome do jogo a que pertence: %s", Decks[i].NomeJogo);
+			getch();		
+		}
+	}
+	else
+	{	
+		gotoxy(45,14);
+		printf("Nao Existe Decks Cadastrados!");
+		Sleep(500);
+	}
+	
+}
+
+//Funcao para mostrar o relatorio de um determinado deck!
+void RelDeck(TpDeck Decks[], int TLD, TpJogo Jogos[], int TLJ, TpCarta Cartas[], int TLC)
+{
+	int AuxCod=0, i, VetCartas[TF], j, y;
+	system("cls");
+	
+	if(TLD>0)
+	{
+		gotoxy(45,4);
+		printf("DIGITE O CODIGO DO DECK\n");
+		gotoxy(45,5);
+		scanf("%d", &AuxCod);
+		if(BuscaDeck(Decks, TLD, AuxCod) == -1)
+		{
+			system("cls");	
+			gotoxy(45,14);
+			printf("Deck inexistente!!!");		
+			Sleep(1000);
+			system("cls");
+		}
+		else
+		{
+			system("cls");
+			i = BuscaDeck(Decks, TLD, AuxCod);
+			gotoxy(45,4);			
+			printf("--> Deck: %s", Decks[i].Titulo);
+			gotoxy(45,6);
+			printf("Jogo: %s - (%d)", Decks[i].NomeJogo, Decks[i].Ano);
+			gotoxy(45,8);
+			printf("- Jogador Responsavel: %s", Decks[i].Jogador);			
+			j = BusCartaEmDeck(AuxCod, Cartas, TLC, VetCartas);	
+			if(j>0 && TLC>0)
+			{	
+				int x = 10;				
+				for(i=0; i<j; i++)
+				{									
+					gotoxy(45,x);
+					y = VetCartas[i];
+					printf("- %s", Cartas[y].NomeCarta);
+					x = x + 1;
+				}				
+				gotoxy(45,x+2);
+				printf("Total de cartas do DECK: %d", i);				
+			}
+			else
+			{
+				gotoxy(45,14);
+				printf("Nao ha cartas vinculadas a esse deck!");		
+				Sleep(1000);
+			}
+		}	
+	}
+	else
+	{
+		system("cls");
+		gotoxy(45,14);
+		printf("Nao ha decks cadastrados!");
+	}
+		
+}
+
+//Funcao para excluir fisicamente um jogo e suas respectivas cartas e decks vinculados!
+void ExcluFisicaJogo(TpJogo Jogos[], int &TLJ, TpCarta Cartas[], int &TLC, TpDeck Decks[], int &TLD)
+{
+	system("cls");
+	int escolha, pos, pos2, confirm=0, VetCartas[TF], y=0, i, z=0, x=0, a=0, VetDecks[TF], l=0, confirmDeck=0;	
+	
+	if(TLJ>0)
+	{
+		gotoxy(45,1);
+		printf("\t#### EXCLUSAO DE JOGOS ####");
+		gotoxy(45,3);
+		printf("Digite o Codigo do Jogo a ser excluido: ");
+		scanf("%d", &escolha);
+		
+		pos = BuscaJogo(Jogos,TLJ,escolha);
+		
+		if(pos == -1)
+		{	
+			system("cls");
+			gotoxy(45,14);
+			printf("O JOGO COM CODIGO %d NAO EXISTE!!!", escolha);
+			Sleep(1000);			
+		}
+		else
+		{
+			z = BuscaCartaEmJogo(Cartas, TLC, escolha, VetCartas);
+			x = BuscaDeckEmJogo(Decks, TLD, escolha, VetDecks);
+			if(z==0)
+			{
+				gotoxy(45,5);									
+				printf("esse Jogo nao possui cartas vinculadas!");		
+			}
+			if(x==0)
+			{		
+				gotoxy(45,6);
+				printf("esse jogo nao possui decks vinculados!");						
+			}
+			if(z>0)
+			{
+				for(i=0,a=2; i<z; i++)
+				{				
+					y = VetCartas[i];
+					gotoxy(35,a+6);
+					printf("Essa acao excluira a(s) seguinte(s) carta(s): %s", Cartas[y].NomeCarta);
+					a = a + 1;					
+					confirm = 1;
+				}				
+			}
+			if(x>0)
+			{
+				for(i=0; i<x; i++)
+				{
+					gotoxy(35,a+6);
+					l = VetDecks[i];
+					printf("Essa acao excluira o(s) seguinte(s) deck(s): %s", Decks[l].Titulo);
+					a = a + 1;
+					confirmDeck = 1;
+				}
+			}
+			getch();		
+			system("cls");
+			gotoxy(45,6);			
+			printf("Confirmar exclusao? 'S' ou 'N'");
+			gotoxy(45,8);
+			printf("Codigo: %d - Nome do Jogo: %s\n", Jogos[pos].CodJogo, Jogos[pos].Descricao);
+			gotoxy(45,10);
+			if(toupper(getche())=='S')
+			{
+				for( ; pos<TLJ; pos++)
+					Jogos[pos] = Jogos[pos+1];
+				y=0;
+				for(i=0; i<z; i++)
+				{
+					y = VetCartas[i];	
+					Cartas[y] = Cartas[TLC-1];
+					TLC--;							
+				}
+				y=0;
+				for(i=0; i<x; i++)
+				{
+					y = VetDecks[i];	
+					Decks[y] = Decks[TLD-1];
+					TLD--;							
+				}
+					
+				TLJ--;
+				
+				if(confirm == 1 && confirmDeck == 1)
+				{
+					Carregando();
+					gotoxy(30,13);
+					printf("|-------------------------------------------------------------------------|");										
+					gotoxy(30,14);					
+					printf("|O JOGO O(S) DECK(S), E A(S) CARTA(S) VINCULADA(S) FOI(RAM) EXCLUIDO(S)!!!|");			
+					gotoxy(30,15);
+					printf("|-------------------------------------------------------------------------|");
+				}				
+				if(confirm == 1 && confirmDeck == 0)
+				{
+					Carregando();
+					gotoxy(35,13);
+					printf("|--------------------------------------------------------|");										
+					gotoxy(35,14);					
+					printf("|O JOGO E A(S) CARTA(S) VINCULADA(S) FOI(RAM) EXCLUIDA(S)!!!|");			
+					gotoxy(35,15);
+					printf("|--------------------------------------------------------|");
+				}
+				if(confirmDeck == 1 && confirm == 0)
+				{
+					Carregando();										
+					gotoxy(35,13);
+					printf("|-------------------------------------------------------|");										
+					gotoxy(35,14);					
+					printf("|O JOGO E O(S) DECK(S) VINCULADO(S) FOI(RAM) EXCLUIDO(S)!!!|");			
+					gotoxy(35,15);
+					printf("|-------------------------------------------------------|");
+				}
+				if(confirmDeck == 0 && confirm == 0)
+				{
+					Carregando();										
+					gotoxy(45,13);
+					printf("|----------------------|");										
+					gotoxy(45,14);					
+					printf("|O JOGO FOI EXCLUIDO!!!|");			
+					gotoxy(45,15);
+					printf("|----------------------|");										
+				}
+			}						
+		}	
+	}
+	else
+	{
+		system("cls");
+		gotoxy(45,14);
+		printf("Nao ha jogos cadastrados!\n\n");		
+	}
+
+}
+
+//Funcao para excluir fisicamente uma carta!
+void ExcluFisicaCarta(TpCarta Cartas[], int &TLC)
+{
+	system("cls");
+	int escolha, pos;
+	if(TLC>0)
+	{
+		gotoxy(45,1);
+		printf("\t#### EXCLUSAO DE CARTAS ####");
+		gotoxy(45,3);
+		printf("Digite o Codigo da carta a ser excluida: ");
+		scanf("%d", &escolha);
+		
+		pos = BuscaCarta(Cartas,TLC,escolha);
+		
+		if(pos==-1)
+		{
+			system("cls");
+			gotoxy(45,14);
+			printf("A CARTA COM CODIGO %d NAO EXISTE!!!", escolha);
+			Sleep(1000);
+		}
+		else
+		{
+			gotoxy(45,5);
+			printf("Confirmar exclusao? 'S' ou 'N'\n");
+			gotoxy(45,7);
+			printf("Codigo da carta: %d", Cartas[pos].CodCarta);
+			gotoxy(45,8);
+			printf("Nome da Carta: %s", Cartas[pos].NomeCarta);
+			gotoxy(45,10);
+			printf("----Descricao da Carta----");
+			gotoxy(1,12);
+			printf("%s", Cartas[pos].Descricao);
+			gotoxy(40,14);
+			printf("\n\n");
+			printf("codigo do jogo a que pertence: %d", Cartas[pos].CodJogo);
+			gotoxy(45,16);						
+			if(toupper(getche())=='S')
+			{
+				for( ; pos<TLC; pos++)
+					Cartas[pos] = Cartas[pos+1];
+					
+				TLC--;
+				system("cls");								
+				Carregando();
+				gotoxy(45,13);						
+				printf("|-----------------------|");
+				gotoxy(45,14);					
+				printf("|A CARTA FOI EXCLUIDA!!!|");			
+				gotoxy(45,15);
+				printf("|-----------------------|");
+				Sleep(1500);			
+				
+			}
+		}
+	}
+	else
+	{
+		system("cls");
+		gotoxy(50,14);
+		printf("Nao ha cartas cadastradas!!!");
+	}
+	
+}
+
+//Funcao para excluir fisicamente um deck!
+void ExcluFisicaDeck(TpDeck Decks[], int &TLD,TpCarta Cartas[], int &TLC)
+{
+	system("cls");
+	int escolha, pos, y, VetCartas[TF];
+	
+	if(TLD>0)
+	{
+		gotoxy(45,4);
+		printf("\t#### EXCLUSAO DE DECKS ####");
+		gotoxy(45,8);
+		printf("Digite o Codigo Do Deck a ser excluido: ");
+		scanf("%d", &escolha);
+		
+		pos = BuscaDeck(Decks, TLD, escolha);
+		
+		if(pos==-1)
+		{
+			system("cls");
+			gotoxy(45,14);
+			printf("O DECK COM CODIGO %d NAO EXISTE!!!", escolha);
+			Sleep(1000);
+		}
+		else
+		{
+			gotoxy(45,10);
+			printf("Confirmar exclusao? 'S' ou 'N'\n\n");
+			gotoxy(45,12);
+			printf("Codigo do Deck: %d", Decks[pos].CodDeck);
+			gotoxy(45,14);			
+			printf("Nome do Deck: %s", Decks[pos].Titulo);			
+			gotoxy(45,16);
+			printf("Jogador Responsavel: %s", Decks[pos].Jogador);			
+			gotoxy(45,18);
+			printf("Ano de Criacao: %d", Decks[pos].Ano);
+			gotoxy(45,20);			
+			printf("Nome do jogo a que pertence: %s", Decks[pos].NomeJogo);	
+			gotoxy(45,22);
+			
+			if(toupper(getche())=='S')
+			{
+				for( ;pos<TLD; pos++)
+					Decks[pos] = Decks[pos+1];
+					
+				TLD--;
+				system("cls");
+				Carregando();
+				gotoxy(45,13);						
+				printf("|-----------------------|");
+				gotoxy(45,14);					
+				printf("|O DECK FOI EXCLUIDO!!! |");			
+				gotoxy(45,15);
+				printf("|-----------------------|");
+				Sleep(1500);			
+				
+				pos = BuscaCartaEmJogo(Cartas, TLC, escolha, VetCartas);
+				for(int i=0; i<pos; i++)
+				{
+					y = VetCartas[i];
+					Cartas[y].CodDeck = 0;			
+				}
+			}
+		}	
+	}
+	else
+	{
+		system("cls");
+		gotoxy(45,14);
+		printf("Nao ha decks cadastrados!\n\n");
+	}
+}
+
+//Funcao para buscar o codigo de um Jogo para checar se o mesmo ja existe!
+int BuscaJogo(TpJogo Jogos[], int TLJ, int Codigo)
+{
+	int i=0;
+	while(i<TLJ && Codigo!=Jogos[i].CodJogo)
+		i++;
+	
+	if (i<TLJ)
+		return i;   
+	else
+		return -1;
+}
+
+//Funcao para buscar o codigo de uma carta para checar se a mesma ja existe!
+int BuscaCarta(TpCarta Cartas[], int TLC, int Codigo)
+{
+	int i=0;
+	while(i<TLC && Codigo!=Cartas[i].CodCarta)
+		i++;
+	
+	if (i<TLC)
+		return i;   
+	else
+		return -1;
+}
+
+//Funcao para buscar o codigo de um deck e saber se o mesmo ja existe!
+int BuscaDeck(TpDeck Decks[], int TLD, int Codigo)
+{
+	int i=0;
+	while(i<TLD && Codigo!=Decks[i].CodDeck)
+		i++;
+	
+	if (i<TLD)
+		return i;   
+	else
+		return -1;
+}
+
+//Funcao para buscar Cartas vinculadas a um determinado jogo, para realizar a exclusao do jogo e da(s) carta(s)!
+int BuscaCartaEmJogo(TpCarta Cartas[], int TLC, int Codigo, int VetCartas[])
+{
+	int i=0, j=0;
+	for(i=0;i<TLC;i++)
+	{
+		if(Cartas[i].CodJogo == Codigo)
+		{
+			VetCartas[j] = i;
+			j++;
+		}
+	}
+	return j;	
+}
+
+//Funcao para buscar decks vinculados a um determinado jogo, para realizar a exclusao do jogo e do(s) deck(s)!
+int BuscaDeckEmJogo(TpDeck Decks[],int TLD,int Codigo,int VetDecks[])
+{
+	int i=0, j=0;
+	for(i=0;i<TLD;i++)
+	{
+		if(Decks[i].CodJogo == Codigo)
+		{
+			VetDecks[j] = i;
+			j++;
+		}
+	}
+	return j;
+}
+
+//Funcao para buscar cartas com o codigo de um determinado deck, para exibir o relatorio de decks!
+int BusCartaEmDeck(int &AuxCod, TpCarta Cartas[], int TLC, int VetCartas[])
+{
+	int i=0, j=0;
+	for(i=0;i<TLC;i++)
+	{
+		if(Cartas[i].CodDeck == AuxCod)
+		{
+			VetCartas[j] = i;
+			j++;
+		}
+	}
+	return j;	
+}
+
+//Verifica se o Deck tem o mesmo codigo do jogo!
+int BusCD(TpDeck Decks[], int TLD, int CodJogo, int CodDeck, int pos)
+{
+	
+	if(Decks[pos].CodDeck == CodDeck && Decks[pos].CodJogo == CodJogo)
+		return 1;
+	else
+		return 0;		
+}
+
+//Funcao para verificar se a carta pertence a o deck escolhido, se ela pertence ao mesmo jogo, e se ela existe!
+int BusC(TpCarta Cartas[], int pos, int CodJogo, int CodDeck, int TLC)
+{
+	if(Cartas[pos].CodDeck == 0 && Cartas[pos].CodJogo == CodJogo)
+		return 0;
+	if(Cartas[pos].CodJogo != CodJogo && pos != -1)
+		return 1;
+	if(Cartas[pos].CodDeck > 0 && Cartas[pos].CodDeck != CodDeck)
+		return 2;
+	if(Cartas[pos].CodDeck == CodDeck)
+		return 3;
+}
+
+//Funcao para cadastrar jogos automaticamente(normalmente para testes rapidos)!
+void cadastrarJogosAutomatico(TpJogo Jogos[], int &TLJ)
+{
+	
+	Jogos[0].CodJogo = 1;
+	strcpy(Jogos[0].Descricao, "Magic Duels");
+	Jogos[1].CodJogo = 2;
+	strcpy(Jogos[1].Descricao, "Hearthstone");
+	Jogos[2].CodJogo = 3;
+	strcpy(Jogos[2].Descricao, "Clash Royale");
+	Jogos[3].CodJogo = 4;
+	strcpy(Jogos[3].Descricao, "Pokemon TCG");
+	system("cls");
+	gotoxy(45,14);
+	printf("OS JOGOS FORAM CADASTRADOS!!!");
+	Sleep(1500);
+	system("cls");
+	TLJ = 4;	
+}
+
+//Funcao para cadastrar cartas automaticamente(normalmente para testes rapidos)!
+
+void cadastrarCartasAutomatico(TpCarta Cartas[], int &TLC, int Verificador)
+{
+	
+	Cartas[0].CodCarta = 10;
+	strcpy(Cartas[0].NomeCarta, "Garbodor");
+	Cartas[0].CodJogo = 12;		
+	strcpy(Cartas[0].Descricao, "Se este Pokemon tiver um card de Ferramenta Pokemon anexado a ele, cada Pokemon em jogo, na mao de cada jogador e na    pilha de descarte de cada jogador nao tem Habilidades (exceto para Garbotoxin).");
+	Cartas[1].CodCarta = 20;
+	strcpy(Cartas[1].NomeCarta, "Bone Splinters");
+	Cartas[1].CodJogo = 1;	
+	strcpy(Cartas[1].Descricao, "Como custo adicional para lancar esta magia, sacrifique uma criatura. Destrua a criatura alvo.");
+	Cartas[2].CodCarta = 30;
+	strcpy(Cartas[2].NomeCarta, "Quaking Punch");
+	Cartas[2].CodJogo = 4;		
+	strcpy(Cartas[2].Descricao, "Quando um Pokemon-EX eh Nocauteado, seu oponente recebe 2 cards de Premio.");
+	Cartas[3].CodCarta = 40;
+	strcpy(Cartas[3].NomeCarta, "Crescente Miracerta");
+	Cartas[3].CodJogo = 2;	
+	strcpy(Cartas[3].Descricao, "Depois que seu heroi atacar um lacaio, seus lacaios o atacam tambem.");
+	Cartas[4].CodCarta = 50;
+	strcpy(Cartas[4].NomeCarta, "Reave Soul");
+	Cartas[4].CodJogo = 1;		
+	strcpy(Cartas[4].Descricao, "Destrua a criatura alvo com poder 3 ou menos.");
+	Cartas[5].CodCarta = 60;
+	strcpy(Cartas[5].NomeCarta, "Exercito de Esqueletos");
+	Cartas[5].CodJogo = 3;		
+	strcpy(Cartas[5].Descricao, "Invoque um Exercito de Esqueletos. Conheca o Larry e seus amigos, Gerry, Terry, Maria e etc...");
+	Cartas[6].CodCarta = 70;
+	strcpy(Cartas[6].NomeCarta, "Mistica Fragmentadora");
+	Cartas[6].CodJogo = 2;		
+	strcpy(Cartas[6].Descricao, "Destrua um Fragmento de Alma do seu deck e cause 3 de dano a todos os outros lacaios.");
+	Cartas[7].CodCarta = 80;
+	strcpy(Cartas[7].NomeCarta, "Horda de Servos");
+	Cartas[7].CodJogo = 3;	
+	strcpy(Cartas[7].Descricao, "Seis atacantes voadores rapidos, sem armadura. Tres eh demais, seis eh uma horda.");
+	Cartas[8].CodCarta = 90;
+	strcpy(Cartas[8].NomeCarta, "Gravedigger");
+	Cartas[8].CodJogo = 2;		
+	strcpy(Cartas[8].Descricao, "Quando Coveiro entra em jogo, voce pode devolver o card de criatura alvo de seu cemiterio para sua mao.");	
+	system("cls");
+	gotoxy(45,14);	
+	printf("AS CARTAS FORAM CADASTRADAS!!!");
+	Sleep(1500);
+	TLC = 9;
+	system("cls");	
+}
+
+//Funcao para cadastrar decks automaticamente(normalmente para testes rapidos)!
+void cadastrarDecksAutomatico(TpDeck Decks[], int &TLD, TpCarta Cartas[], int &TLC)
+{	
+	Decks[0].CodDeck = 123;
+	strcpy(Decks[0].Titulo, "Enchantments");
+	strcpy(Decks[0].Jogador, "HARBiNG3R");
+	Decks[0].Ano = 2019;
+	strcpy(Decks[0].NomeJogo, "Magic Duels");
+	Decks[0].CodJogo = 1;
+	Cartas[4].CodDeck = 123;
+	Cartas[1].CodDeck = 123;	
+	Decks[1].CodDeck = 456;	
+	strcpy(Decks[1].Titulo, "Inn-Vitational");
+	strcpy(Decks[1].Jogador, "Battletag");
+	Decks[1].Ano = 2019;
+	strcpy(Decks[1].NomeJogo, "Hearthstone");
+	Decks[1].CodJogo = 2;
+	Cartas[3].CodDeck = 456;
+	Cartas[6].CodDeck = 456;
+	Cartas[8].CodDeck = 456;
+	Decks[2].CodDeck = 789;
+	strcpy(Decks[2].Titulo, "FlakesPower");
+	strcpy(Decks[2].Jogador, "Frank Oskam");
+	Decks[2].Ano = 2020;
+	strcpy(Decks[2].NomeJogo, "Pokemon TCG");
+	Decks[2].CodJogo = 3;
+	Cartas[0].CodDeck = 789;
+	Cartas[2].CodDeck = 789;
+	system("cls");
+	gotoxy(45,14);
+	printf("OS DECKS FORAM CADASTRADOS!!!");
+	Sleep(1500);
+	system("cls");
+	TLD = 3;
+}
